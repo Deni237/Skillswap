@@ -3,12 +3,14 @@ package com.company.skillswap.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,8 +31,9 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceAround
+            verticalArrangement = Arrangement.Top
         ) {
+            Spacer(modifier = Modifier.height(48.dp))
             // Logo
             Image(
                 painter = painterResource(id = R.drawable.ic_logo), // Remplace par ton logo
@@ -38,14 +41,18 @@ fun HomeScreen(
                 modifier = Modifier.size(120.dp)
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
             // Slogan
             Text(
                 text = "Le meilleur service pour apprendre et partager",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(top = 16.dp),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 8.dp),
                 color = MaterialTheme.colorScheme.primary
             )
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Image centrale
             Image(
@@ -55,6 +62,8 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .height(250.dp)
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Bouton Inscription
             Button(
@@ -66,6 +75,8 @@ fun HomeScreen(
             ) {
                 Text("S'inscrire", fontSize = 18.sp)
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Texte "Déjà un compte ?" + bouton S'identifier
             Row(
