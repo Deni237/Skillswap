@@ -2,11 +2,8 @@ package com.company.skillswap.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,7 +12,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,12 +20,14 @@ import com.company.skillswap.R
 import com.company.skillswap.ui.theme.SkillSwapTheme
 
 @Composable
-fun LoginScreen(
-    onLoginClick: (String, String) -> Unit = { _, _ -> },
-    onSignUpClick: () -> Unit = {}
+fun SignUpScreen(
+    onSignUpClick: (String, String, String) -> Unit = { _, _, _ -> },
+    onSignInClick: () -> Unit = {}
 ) {
     var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -54,7 +52,7 @@ fun LoginScreen(
 
             // Slogan
             Text(
-                text = "Connectez-vous pour apprendre et partager",
+                text = "Rejoignez-nous et partagez vos compétences !",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
@@ -64,7 +62,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Champ utilisateur
+            // Champ Nom d'utilisateur
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -75,7 +73,19 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Champ mot de passe
+            // Champ Email
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Adresse e-mail") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Champ Mot de passe
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -86,45 +96,57 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Champ Confirmation du mot de passe
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text("Confirmer le mot de passe") },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Bouton Se connecter
+            // Bouton S'inscrire
             Button(
-                onClick = { onLoginClick(username, password) },
+                onClick = { onSignUpClick(username, email, password) },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Text("Se connecter", fontSize = 18.sp)
+                Text("S'inscrire", fontSize = 18.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Texte "Pas de compte ?" + bouton s'inscrire
+            // Texte "Déjà un compte ?" + bouton S'identifier
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Pas de compte ? ", fontSize = 16.sp)
-                TextButton(onClick = onSignUpClick) {
-                    Text(text = "Inscrivez-vous", fontSize = 16.sp)
+                Text(text = "Déjà un compte ? ", fontSize = 16.sp)
+                TextButton(onClick = onSignInClick) {
+                    Text(text = "S'identifier", fontSize = 16.sp)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
+fun SignUpScreenPreview() {
     SkillSwapTheme(dynamicColor = false) {
-        LoginScreen(
-            onLoginClick = { _, _ -> },
-            onSignUpClick = {}
+        SignUpScreen(
+            onSignUpClick = { _, _, _ -> },
+            onSignInClick = {}
         )
     }
 }
