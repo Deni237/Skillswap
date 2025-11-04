@@ -1,5 +1,6 @@
 package com.company.skillswap.ui
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -14,14 +15,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.R
+import com.company.skillswap.navigation.AppRoutes
 import com.company.skillswap.ui.theme.SkillSwapTheme
 
 @Composable
-fun HomeScreen(
-    onSignUpClick: () -> Unit = {},
-    onSignInClick: () -> Unit = {}
-) {
+fun HomeScreen(navController: NavController) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -67,7 +69,9 @@ fun HomeScreen(
 
             // Bouton Inscription
             Button(
-                onClick = onSignUpClick,
+                onClick = {
+                    navController.navigate(AppRoutes.SIGNUP)
+                },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -85,7 +89,7 @@ fun HomeScreen(
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Text(text = "Déjà un compte ? ", fontSize = 16.sp)
-                TextButton(onClick = onSignInClick) {
+                TextButton(onClick = { navController.navigate(AppRoutes.LOGIN) }) {
                     Text(text = "S'identifier", fontSize = 16.sp)
                 }
             }
@@ -97,9 +101,6 @@ fun HomeScreen(
 @Composable
 fun HomeScreenPreview() {
     SkillSwapTheme(dynamicColor = false) {
-        HomeScreen(
-            onSignUpClick = {},
-            onSignInClick = {}
-        )
+        HomeScreen(navController = rememberNavController())
     }
 }

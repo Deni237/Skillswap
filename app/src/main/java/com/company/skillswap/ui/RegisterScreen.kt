@@ -1,5 +1,7 @@
 package com.company.skillswap.ui
 
+import android.media.RemoteController
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,14 +18,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.R
+import com.company.skillswap.navigation.AppRoutes
 import com.company.skillswap.ui.theme.SkillSwapTheme
 
 @Composable
-fun SignUpScreen(
-    onSignUpClick: (String, String, String) -> Unit = { _, _, _ -> },
-    onSignInClick: () -> Unit = {}
-) {
+fun SignUpScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -113,7 +115,7 @@ fun SignUpScreen(
 
             // Bouton S'inscrire
             Button(
-                onClick = { onSignUpClick(username, email, password) },
+                onClick = { navController.navigate(AppRoutes.PROFILE_CONFIG) },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -130,7 +132,7 @@ fun SignUpScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "Déjà un compte ? ", fontSize = 16.sp)
-                TextButton(onClick = onSignInClick) {
+                TextButton(onClick = { navController.navigate(AppRoutes.LOGIN) } ) {
                     Text(text = "S'identifier", fontSize = 16.sp)
                 }
             }
@@ -144,9 +146,7 @@ fun SignUpScreen(
 @Composable
 fun SignUpScreenPreview() {
     SkillSwapTheme(dynamicColor = false) {
-        SignUpScreen(
-            onSignUpClick = { _, _, _ -> },
-            onSignInClick = {}
-        )
+        var navController = rememberNavController()
+        SignUpScreen(navController)
     }
 }

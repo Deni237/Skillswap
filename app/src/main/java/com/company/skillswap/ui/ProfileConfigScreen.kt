@@ -17,15 +17,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.R
+import com.company.skillswap.navigation.AppRoutes
 import com.company.skillswap.ui.theme.SkillSwapTheme
 
 @Composable
-fun ProfileConfigScreen(
-    onSaveClick: () -> Unit = {},
-    onSkipClick: () -> Unit = {},
-    onUploadPhotoClick: () -> Unit = {} // Action pour ouvrir galerie
-) {
+fun ProfileConfigScreen(navController: NavController) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var offeredSkills by remember { mutableStateOf("") }
@@ -134,14 +133,14 @@ fun ProfileConfigScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    onClick = onSaveClick,
+                    onClick = { navController.navigate(AppRoutes.DASHBOARD) },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Valider")
                 }
 
                 OutlinedButton(
-                    onClick = onSkipClick,
+                    onClick = { navController.navigate(AppRoutes.DASHBOARD) },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Ignorer")
@@ -155,7 +154,8 @@ fun ProfileConfigScreen(
 @Preview(showBackground = true)
 @Composable
 fun ProfileConfigScreenPreview() {
+    var navController = rememberNavController()
     SkillSwapTheme(dynamicColor = false) {
-        ProfileConfigScreen()
+        ProfileConfigScreen(navController)
     }
 }

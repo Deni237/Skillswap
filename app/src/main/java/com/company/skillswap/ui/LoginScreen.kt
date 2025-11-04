@@ -20,14 +20,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.R
+import com.company.skillswap.navigation.AppRoutes
 import com.company.skillswap.ui.theme.SkillSwapTheme
 
 @Composable
-fun LoginScreen(
-    onLoginClick: (String, String) -> Unit = { _, _ -> },
-    onSignUpClick: () -> Unit = {}
-) {
+fun LoginScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -90,7 +90,7 @@ fun LoginScreen(
 
             // Bouton Se connecter
             Button(
-                onClick = { onLoginClick(username, password) },
+                onClick = { navController.navigate(AppRoutes.DASHBOARD) },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,7 +107,7 @@ fun LoginScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "Pas de compte ? ", fontSize = 16.sp)
-                TextButton(onClick = onSignUpClick) {
+                TextButton(onClick = {navController.navigate(AppRoutes.SIGNUP)}) {
                     Text(text = "Inscrivez-vous", fontSize = 16.sp)
                 }
             }
@@ -122,9 +122,7 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     SkillSwapTheme(dynamicColor = false) {
-        LoginScreen(
-            onLoginClick = { _, _ -> },
-            onSignUpClick = {}
-        )
+        var navController = rememberNavController()
+        LoginScreen(navController)
     }
 }
