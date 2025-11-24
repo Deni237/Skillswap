@@ -1,4 +1,5 @@
 package com.company.skillswap.ui
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -25,6 +26,9 @@ import com.company.skillswap.ui.theme.SkillSwapTheme
 
 @Composable
 fun ProfileConfigScreen(navController: NavController) {
+
+    BackHandler(true) {}
+
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var offeredSkills by remember { mutableStateOf("") }
@@ -140,7 +144,10 @@ fun ProfileConfigScreen(navController: NavController) {
                 }
 
                 OutlinedButton(
-                    onClick = { navController.navigate(AppRoutes.DASHBOARD) },
+                    onClick = { navController.navigate(AppRoutes.DASHBOARD){
+                        popUpTo(AppRoutes.PROFILE_CONFIG) { inclusive = true }
+                        launchSingleTop = true
+                    } },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Ignorer")

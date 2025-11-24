@@ -1,5 +1,6 @@
 package com.company.skillswap.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +24,9 @@ import com.company.skillswap.ui.theme.SkillSwapTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashScreen() {
+
+    BackHandler(true) {}
+
     val competences = listOf("Peinture", "Cours d’anglais", "Bricolage", "Cuisine","programmation")
 
     Scaffold(

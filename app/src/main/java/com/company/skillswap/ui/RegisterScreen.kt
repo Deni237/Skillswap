@@ -2,6 +2,7 @@ package com.company.skillswap.ui
 
 import android.media.RemoteController
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,16 +26,25 @@ import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.R
 import com.company.skillswap.navigation.AppRoutes
 import com.company.skillswap.ui.theme.SkillSwapTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.company.skillswap.model.User
+
 
 @Composable
 fun SignUpScreen(navController: NavController) {
 
     BackHandler(true) {}
 
+    val context = LocalContext.current
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+
+    val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance().getReference("users")
+
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -119,10 +130,45 @@ fun SignUpScreen(navController: NavController) {
 
             // Bouton S'inscrire
             Button(
-                onClick = { navController.navigate(AppRoutes.PROFILE_CONFIG){
-                    popUpTo(AppRoutes.SIGNUP) { inclusive = true }
-                    launchSingleTop = true
-                } },
+                onClick = {
+
+                    if (username.isBlank() || email.isBlank() || password.isBlank()) {
+                        Toast.makeText(context, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    if (password != confirmPassword) {
+                        Toast.makeText(context, "Les mots de passe ne correspondent pas", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    // Créer l'utilisateur avec Firebase Auth
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val uid = auth.currentUser?.uid ?: ""
+                                val user = User(uid, username, email, profileCompleted = false)
+
+                                // Stocker l'utilisateur dans Realtime Database
+                                database.child(uid).setValue(user)
+                                    .addOnCompleteListener { dbTask ->
+                                        if (dbTask.isSuccessful) {
+                                            Toast.makeText(context, "Inscription réussie !", Toast.LENGTH_SHORT).show()
+                                            navController.navigate(AppRoutes.PROFILE_CONFIG) {
+                                                popUpTo(AppRoutes.SIGNUP) { inclusive = true }
+                                                launchSingleTop = true
+                                            }
+                                        } else {
+                                            Toast.makeText(context, "Erreur lors de l'enregistrement des données", Toast.LENGTH_SHORT).show()
+                                            Log.e("SignUp", "Erreur DB: ${dbTask.exception}")
+                                        }
+                                    }
+                            } else {
+                                Toast.makeText(context, "Erreur d'inscription: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                Log.e("SignUp", "Erreur Auth: ${task.exception}")
+                            }
+                        }
+                },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
