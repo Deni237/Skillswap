@@ -70,7 +70,10 @@ fun HomeScreen(navController: NavController) {
             // Bouton Inscription
             Button(
                 onClick = {
-                    navController.navigate(AppRoutes.SIGNUP)
+                    navController.navigate(AppRoutes.SIGNUP){
+                        popUpTo(AppRoutes.HOME) { inclusive = true }
+                        launchSingleTop = true
+                    }
                 },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
@@ -89,7 +92,10 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Text(text = "Déjà un compte ? ", fontSize = 16.sp)
-                TextButton(onClick = { navController.navigate(AppRoutes.LOGIN) }) {
+                TextButton(onClick = { navController.navigate(AppRoutes.LOGIN){
+                    popUpTo(AppRoutes.HOME) { inclusive = true }
+                    launchSingleTop = true
+                } }) {
                     Text(text = "S'identifier", fontSize = 16.sp)
                 }
             }

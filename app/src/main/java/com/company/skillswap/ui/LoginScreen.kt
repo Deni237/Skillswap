@@ -1,5 +1,6 @@
 package com.company.skillswap.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,9 @@ import com.company.skillswap.ui.theme.SkillSwapTheme
 
 @Composable
 fun LoginScreen(navController: NavController) {
+
+    BackHandler(true) {}
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 

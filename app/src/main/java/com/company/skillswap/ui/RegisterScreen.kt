@@ -2,6 +2,7 @@ package com.company.skillswap.ui
 
 import android.media.RemoteController
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +27,9 @@ import com.company.skillswap.ui.theme.SkillSwapTheme
 
 @Composable
 fun SignUpScreen(navController: NavController) {
+
+    BackHandler(true) {}
+
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -115,7 +119,10 @@ fun SignUpScreen(navController: NavController) {
 
             // Bouton S'inscrire
             Button(
-                onClick = { navController.navigate(AppRoutes.PROFILE_CONFIG) },
+                onClick = { navController.navigate(AppRoutes.PROFILE_CONFIG){
+                    popUpTo(AppRoutes.SIGNUP) { inclusive = true }
+                    launchSingleTop = true
+                } },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -132,7 +139,10 @@ fun SignUpScreen(navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "Déjà un compte ? ", fontSize = 16.sp)
-                TextButton(onClick = { navController.navigate(AppRoutes.LOGIN) } ) {
+                TextButton(onClick = { navController.navigate(AppRoutes.LOGIN){
+                    popUpTo(AppRoutes.SIGNUP) { inclusive = true }
+                    launchSingleTop = true
+                } } ) {
                     Text(text = "S'identifier", fontSize = 16.sp)
                 }
             }
