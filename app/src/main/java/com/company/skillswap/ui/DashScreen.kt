@@ -10,6 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,7 +29,21 @@ fun DashScreen() {
 
     BackHandler(true) {}
 
-    val competences = listOf("Peinture", "Cours d’anglais", "Bricolage", "Cuisine","programmation")
+    data class UserSkill(
+        val name: String,
+        val city: String,
+        val competence: String,
+        var isFavorite: Boolean = false // pour gérer l’état du favoris
+    )
+
+// Exemple de données
+    val users = remember {
+        mutableStateListOf(
+            UserSkill("Denilson", "Montréal", "Programmation"),
+            UserSkill("Alice", "Toronto", "Peinture"),
+            UserSkill("Bob", "Vancouver", "Cuisine")
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -131,28 +147,62 @@ fun DashScreen() {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(competences) { competence ->
+                items(users) { user ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp),
+                            .wrapContentHeight(),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
                         onClick = { /* TODO: Action sur la compétence */ }
                     ) {
-                        Box(
-                            contentAlignment = Alignment.CenterStart,
+                        Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(start = 16.dp)
+                                .padding(16.dp)
                         ) {
+                            // Ligne compétence + favoris
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = user.competence,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp
+                                )
+                                IconButton(onClick = {
+                                    user.isFavorite = !user.isFavorite
+                                }) {
+                                    Icon(
+                                        imageVector = if (user.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                        contentDescription = "Favoris",
+                                        tint = if (user.isFavorite) Color.Red else MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            // Nom en majuscule
                             Text(
-                                text = competence,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                text = user.name.uppercase(),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f),
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 18.sp
+                                fontSize = 14.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(2.dp))
+
+                            // Ville
+                            Text(
+                                text = user.city,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                                fontSize = 14.sp
                             )
                         }
                     }
