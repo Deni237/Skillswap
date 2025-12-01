@@ -16,6 +16,8 @@ object AppRoutes {
     const val SIGNUP = "signup"
     const val DASHBOARD = "dashboard"
     const val PROFILE_CONFIG = "profile_config"
+
+    const val SKILL_DETAIL = "skill_detail/{userId}"
 }
 
 @Composable
@@ -38,11 +40,16 @@ fun AppNavigation() {
         }
 
         composable(AppRoutes.DASHBOARD) {
-            DashScreen()
+            DashScreen(navController)
         }
 
         composable(AppRoutes.PROFILE_CONFIG) {
             ProfileConfigScreen(navController)
+        }
+        composable(AppRoutes.SKILL_DETAIL) {
+                backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            SkillScreen(navController = navController, userId = userId)
         }
     }
 }

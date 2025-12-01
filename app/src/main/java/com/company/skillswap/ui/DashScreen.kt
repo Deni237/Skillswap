@@ -2,48 +2,57 @@ package com.company.skillswap.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.company.skillswap.R
 import com.company.skillswap.ui.theme.SkillSwapTheme
+import com.company.skillswap.viewmodel.DashViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.database.FirebaseDatabase
+import androidx.compose.ui.text.input.ImeAction
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.company.skillswap.navigation.AppRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashScreen() {
+fun DashScreen(navController: NavController, dashViewModel: DashViewModel = viewModel()) {
 
     BackHandler(true) {}
 
-    data class UserSkill(
-        val name: String,
-        val city: String,
-        val competence: String,
-        var isFavorite: Boolean = false // pour gérer l’état du favoris
-    )
 
-// Exemple de données
-    val users = remember {
-        mutableStateListOf(
-            UserSkill("Denilson", "Montréal", "Programmation"),
-            UserSkill("Alice", "Toronto", "Peinture"),
-            UserSkill("Bob", "Vancouver", "Cuisine")
-        )
-    }
+    var skillQuery by remember { mutableStateOf("") }
+    var cityQuery by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val skills = dashViewModel.skills.collectAsState()
+
 
     Scaffold(
         topBar = {
@@ -113,22 +122,59 @@ fun DashScreen() {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Barre de recherche
-            OutlinedTextField(
-                value = "",
-                onValueChange = {},
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Rechercher une compétence") },
-                leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Recherche")
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.Gray,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                )
-            )
+            Column(modifier = Modifier.fillMaxWidth()) {
+
+                    OutlinedTextField(
+                        value = skillQuery,
+                        onValueChange = {skillQuery = it},
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Rechercher une compétence") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = "Recherche")
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = Color.Gray,
+                            cursorColor = MaterialTheme.colorScheme.primary
+                        ),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(
+                            onSearch = {
+                                dashViewModel.filterSkills(skillQuery, cityQuery)
+                            }
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Champ pour la ville
+                    OutlinedTextField(
+                        value = cityQuery,
+                        onValueChange = { cityQuery = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Rechercher par ville") },
+                        leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = Color.Gray,
+                            cursorColor = MaterialTheme.colorScheme.primary
+                        ),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(
+                            onSearch = {
+                                dashViewModel.filterSkills(skillQuery, cityQuery) // Filtrage dans le ViewModel
+                            }
+                        )
+                    )
+
+
+
+            }
+
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -147,7 +193,7 @@ fun DashScreen() {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(users) { user ->
+                items(skills.value) { userSkill ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -156,7 +202,9 @@ fun DashScreen() {
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
-                        onClick = { /* TODO: Action sur la compétence */ }
+                        onClick = {
+                            navController.navigate("skill_detail/${userSkill.userId}")
+                        }
                     ) {
                         Column(
                             modifier = Modifier
@@ -170,18 +218,17 @@ fun DashScreen() {
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    text = user.competence,
+                                    text = userSkill.competence,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp
                                 )
                                 IconButton(onClick = {
-                                    user.isFavorite = !user.isFavorite
                                 }) {
                                     Icon(
-                                        imageVector = if (user.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                        contentDescription = "Favoris",
-                                        tint = if (user.isFavorite) Color.Red else MaterialTheme.colorScheme.onPrimaryContainer
+                                        imageVector = Icons.Default.FavoriteBorder,
+                                        contentDescription = "Favori",
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
                                 }
                             }
@@ -190,7 +237,7 @@ fun DashScreen() {
 
                             // Nom en majuscule
                             Text(
-                                text = user.name.uppercase(),
+                                text = "${userSkill.firstName} " + "${userSkill.lastName}".uppercase(),
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f),
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 14.sp
@@ -200,7 +247,7 @@ fun DashScreen() {
 
                             // Ville
                             Text(
-                                text = user.city,
+                                text = userSkill.city,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                                 fontSize = 14.sp
                             )
@@ -216,6 +263,7 @@ fun DashScreen() {
 @Composable
 fun DashScreenPreview() {
     SkillSwapTheme(dynamicColor = false) {
-        DashScreen()
+        var navController = rememberNavController()
+        DashScreen(navController)
     }
 }
