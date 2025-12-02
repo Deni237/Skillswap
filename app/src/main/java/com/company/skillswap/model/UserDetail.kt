@@ -9,5 +9,6 @@ data class UserDetail(
     val description: String,
     val offeredSkills: List<String>,
     val desiredSkills: List<String>,
-    val birthDate: String
+    val birthDate: String,
+    val uid:String
 )

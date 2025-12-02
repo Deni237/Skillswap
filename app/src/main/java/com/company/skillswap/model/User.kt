@@ -10,6 +10,7 @@ data class User(
     val lastName: String = "",
     val offeredSkills: List<String> = emptyList(),
     val desiredSkills: List<String> = emptyList(),
+    val favoriteSkills: List<String> = emptyList(),
     val birthDate: Long = 0L,
     val location: String = "",
     val description: String = "",

@@ -16,8 +16,19 @@ object AppRoutes {
     const val SIGNUP = "signup"
     const val DASHBOARD = "dashboard"
     const val PROFILE_CONFIG = "profile_config"
-
     const val SKILL_DETAIL = "skill_detail/{userId}"
+
+    const val PROFILE = "profile"
+
+    const val EDIT_PROFILE = "edit_profile"
+    const val FAVORITES = "favorites"
+
+    const val MESSAGES = "messages"
+
+    const val NOTIFICATIONS = "notifications"
+
+
+
 }
 
 @Composable
@@ -46,6 +57,27 @@ fun AppNavigation() {
         composable(AppRoutes.PROFILE_CONFIG) {
             ProfileConfigScreen(navController)
         }
+
+        composable(AppRoutes.PROFILE) {
+            ProfileScreen(navController)
+        }
+
+        composable(AppRoutes.EDIT_PROFILE) {
+            EditProfileScreen(navController)
+        }
+
+        composable(AppRoutes.MESSAGES) {
+            MessagesScreen(navController)
+        }
+
+        composable(AppRoutes.NOTIFICATIONS) {
+            NotificationsScreen(navController)
+        }
+
+        composable(AppRoutes.FAVORITES) {
+            FavoritesScreen(navController)
+        }
+
         composable(AppRoutes.SKILL_DETAIL) {
                 backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId") ?: return@composable

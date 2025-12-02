@@ -42,17 +42,25 @@ import java.text.SimpleDateFormat
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SkillScreen(navController: NavController,userId: String,skillViewModel: SkillViewModel = viewModel ()) {
 
-
     val user = skillViewModel.user.collectAsState().value
+    var isRequestSent by remember { mutableStateOf(false) }
 
-    // Charge les données de l'utilisateur quand l'écran s'affiche
     LaunchedEffect(userId) {
         skillViewModel.loadUserSkill(userId)
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@LaunchedEffect
+        skillViewModel.hasSentRequest(currentUserId, userId) { sent ->
+            isRequestSent = sent
+        }
     }
 
     BackHandler(true) {
@@ -195,18 +203,22 @@ fun SkillScreen(navController: NavController,userId: String,skillViewModel: Skil
 
             Button(
                 onClick = {
-
+                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@Button
+                    user?.let {
+                        skillViewModel.sendRequest(
+                            senderId = currentUserId,
+                            receiverId = userId,
+                        )
+                        isRequestSent = true
+                    }
                 },
+                enabled =!isRequestSent,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 0.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(
-                    text = "Postulez",
-                    fontSize = 18.sp,
-
-                )
+                Text(text = if (isRequestSent) "Demande envoyée" else "Postulez", fontSize = 18.sp)
             }
 
 

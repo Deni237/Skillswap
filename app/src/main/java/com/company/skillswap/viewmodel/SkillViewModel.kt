@@ -1,6 +1,7 @@
 package com.company.skillswap.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.company.skillswap.model.AddRequest
 import com.company.skillswap.model.UserSkill
 import com.google.firebase.database.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +11,7 @@ import com.company.skillswap.model.UserDetail
 import java.util.Date
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
 
 class SkillViewModel: ViewModel(){
     private val usersRef = FirebaseDatabase.getInstance().getReference("users")
@@ -31,6 +33,7 @@ class SkillViewModel: ViewModel(){
                 }
 
                 _user.value = UserDetail(
+                    uid = user.uid,
                     username = user.username,
                     firstName = user.firstName,
                     lastName = user.lastName,
@@ -45,8 +48,44 @@ class SkillViewModel: ViewModel(){
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Gérer l'erreur si besoin
             }
         })
+    }
+
+    fun sendRequest(senderId: String, receiverId: String) {
+        val requestsRef = FirebaseDatabase.getInstance()
+            .getReference("demandes")
+            .child(receiverId)
+
+        val newRequestRef = requestsRef.push()
+        val request = AddRequest(
+            senderId = senderId,
+            receiverId = receiverId,
+        )
+
+        newRequestRef.setValue(request)
+            .addOnSuccessListener {
+                println("Demande envoyée avec succès")
+            }
+            .addOnFailureListener { e ->
+                println("Erreur lors de l'envoi : ${e.message}")
+            }
+    }
+
+    fun hasSentRequest(senderId: String, receiverId: String, onResult: (Boolean) -> Unit) {
+        val requestsRef = FirebaseDatabase.getInstance()
+            .getReference("demandes")
+            .child(receiverId)
+
+        requestsRef.orderByChild("senderId").equalTo(senderId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    onResult(snapshot.exists())
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    onResult(false)
+                }
+            })
     }
 }

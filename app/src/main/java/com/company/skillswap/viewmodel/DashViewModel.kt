@@ -28,8 +28,13 @@ class DashViewModel : ViewModel() {
     private val _userLocation = MutableStateFlow<String?>(null)
     val userLocation: StateFlow<String?> = _userLocation
 
+
+    private val _favorites = MutableStateFlow<Set<String>>(emptySet())
+    val favorites: StateFlow<Set<String>> = _favorites
+
     init {
         loadUserLocation()
+        loadFavorites()
     }
 
     private fun loadUserLocation() {
@@ -47,6 +52,9 @@ class DashViewModel : ViewModel() {
         })
     }
 
+    fun reloadUserLocation() {
+        loadUserLocation()
+    }
     fun loadSkills() {
         val currentUserUid = auth.currentUser?.uid
 
@@ -67,13 +75,16 @@ class DashViewModel : ViewModel() {
                                 lastName = user.lastName,
                                 city = userLocation,
                                 competence = skill,
-                                userId = user.uid
+                                userId = user.uid,
+                                isFavorite = _favorites.value.contains(user.uid)
                             )
                         )
                     }
                 }
 
-                _skills.value = _allSkills
+                // Filtrage par défaut sur la ville de l'utilisateur connecté
+                val defaultCity = _userLocation.value ?: ""
+                _skills.value = _allSkills.filter { it.city == defaultCity }
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -94,5 +105,25 @@ class DashViewModel : ViewModel() {
 
         _skills.value = filtered
     }
+
+    private fun loadFavorites() {
+        val uid = auth.currentUser?.uid ?: return
+        usersRef.child(uid).child("favoriteSkills").get()
+            .addOnSuccessListener { snapshot ->
+                val favList = snapshot.getValue(object : GenericTypeIndicator<List<String>>() {}) ?: emptyList()
+                _favorites.value = favList.toSet()
+            }
+    }
+    fun toggleFavoriteProfile(profileId: String) {
+        val uid = auth.currentUser?.uid ?: return
+        val newFavorites = _favorites.value.toMutableSet()
+
+        if (newFavorites.contains(profileId)) newFavorites.remove(profileId)
+        else newFavorites.add(profileId)
+
+        _favorites.value = newFavorites
+        usersRef.child(uid).child("favoriteSkills").setValue(newFavorites.toList())
+    }
+
 
 }
