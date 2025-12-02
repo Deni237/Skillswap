@@ -114,7 +114,7 @@ fun ProfileScreen(navController: NavController, profileViewModel: ProfileViewMod
                                         expanded = false
                                         FirebaseAuth.getInstance().signOut()
                                         navController.navigate(AppRoutes.LOGIN) {
-                                            popUpTo(AppRoutes.PROFILE) { inclusive = true } // supprime la stack pour éviter retour arrière
+                                            popUpTo(0) // supprime la stack pour éviter retour arrière
                                         }
                                     }
                                 )

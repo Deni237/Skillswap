@@ -40,6 +40,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.database.FirebaseDatabase
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.navigation.AppRoutes
@@ -238,10 +239,12 @@ fun DashScreen(navController: NavController, dashViewModel: DashViewModel = view
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    text = userSkill.competence,
+                                    text = userSkill.competences.joinToString("/ "),
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp
+                                    fontSize = 18.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 IconButton(onClick = {
                                     dashViewModel.toggleFavoriteProfile(userSkill.userId)

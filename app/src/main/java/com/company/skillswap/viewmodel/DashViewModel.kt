@@ -32,10 +32,13 @@ class DashViewModel : ViewModel() {
     private val _favorites = MutableStateFlow<Set<String>>(emptySet())
     val favorites: StateFlow<Set<String>> = _favorites
 
+
     init {
         loadUserLocation()
         loadFavorites()
     }
+
+
 
     private fun loadUserLocation() {
         val uid = auth.currentUser?.uid ?: return
@@ -68,18 +71,18 @@ class DashViewModel : ViewModel() {
 
                     val userLocation = user.location ?: ""
 
-                    user.offeredSkills.forEach { skill ->
-                        _allSkills.add(
+
+                    _allSkills.add(
                             UserSkill(
                                 firstName = user.firstName,
                                 lastName = user.lastName,
                                 city = userLocation,
-                                competence = skill,
+                                competences = user.offeredSkills,
                                 userId = user.uid,
                                 isFavorite = _favorites.value.contains(user.uid)
                             )
-                        )
-                    }
+                    )
+
                 }
 
                 // Filtrage par défaut sur la ville de l'utilisateur connecté
@@ -95,7 +98,7 @@ class DashViewModel : ViewModel() {
     fun filterSkills(skillQuery: String, cityQuery: String) {
         val filtered = _allSkills.filter { skill ->
             val matchesSkill = skillQuery.isBlank() ||
-                    skill.competence.contains(skillQuery, ignoreCase = true)
+                    skill.competences.any { it.contains(skillQuery, ignoreCase = true) }
 
             val matchesCity = cityQuery.isBlank() ||
                     skill.city.contains(cityQuery, ignoreCase = true)
@@ -124,6 +127,7 @@ class DashViewModel : ViewModel() {
         _favorites.value = newFavorites
         usersRef.child(uid).child("favoriteSkills").setValue(newFavorites.toList())
     }
+
 
 
 }

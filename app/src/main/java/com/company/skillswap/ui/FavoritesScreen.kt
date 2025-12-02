@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -149,10 +150,12 @@ fun FavoritesScreen(navController: NavController, dashViewModel: DashViewModel =
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    text = userSkill.competence,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    text = userSkill.competences.joinToString("/ "),                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp
+                                    fontSize = 18.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+
                                 )
                                 IconButton(onClick = {
                                     dashViewModel.toggleFavoriteProfile(userSkill.userId)

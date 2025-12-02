@@ -4,7 +4,7 @@ data class UserSkill(
     val firstName: String = "",
     val lastName: String = "",
     val city: String = "",
-    val competence: String = "",
-    val userId:String = "",
-    val isFavorite: Boolean = false
+    val competences: List<String> = emptyList(),
+    val isFavorite: Boolean = false,
+    val userId: String = ""
 )
