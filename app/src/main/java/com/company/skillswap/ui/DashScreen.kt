@@ -51,13 +51,15 @@ fun DashScreen(navController: NavController, dashViewModel: DashViewModel = view
 
     BackHandler(true) {}
 
+    LaunchedEffect(Unit) {
+        dashViewModel.reloadUserLocation()
+        dashViewModel.loadSkills()
+        dashViewModel.loadFavorites()
+    }
 
     var skillQuery by remember { mutableStateOf("") }
     var cityQuery by remember { mutableStateOf("") }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val skills = dashViewModel.skills.collectAsState()
-    val favorites by dashViewModel.favorites.collectAsState()
-
+    val skills by dashViewModel.skillsWithFavorites.collectAsState()
 
     Scaffold(
         topBar = {
@@ -213,8 +215,7 @@ fun DashScreen(navController: NavController, dashViewModel: DashViewModel = view
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(skills.value) { userSkill ->
-                    val isFavorite = favorites.contains(userSkill.userId)
+                items(skills) { userSkill ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -251,7 +252,7 @@ fun DashScreen(navController: NavController, dashViewModel: DashViewModel = view
                                 }) {
 
                                     Icon(
-                                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                        imageVector = if (userSkill.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                         contentDescription = "Favori",
                                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                                     )

@@ -1,6 +1,7 @@
 package com.company.skillswap.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -11,7 +12,9 @@ import kotlinx.coroutines.launch
 import com.company.skillswap.model.UserSkill
 import com.google.firebase.database.DataSnapshot
 import com.company.skillswap.model.User
-
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 
 class DashViewModel : ViewModel() {
@@ -28,14 +31,22 @@ class DashViewModel : ViewModel() {
     private val _userLocation = MutableStateFlow<String?>(null)
     val userLocation: StateFlow<String?> = _userLocation
 
-
     private val _favorites = MutableStateFlow<Set<String>>(emptySet())
-    val favorites: StateFlow<Set<String>> = _favorites
+
+    // Flux combiné : compétences avec statut "favori" à jour automatiquement
+    val skillsWithFavorites: StateFlow<List<UserSkill>> =
+        combine(_skills, _favorites) { skills, favs ->
+            skills.map { skill ->
+                skill.copy(isFavorite = favs.contains(skill.userId))
+            }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
 
 
     init {
         loadUserLocation()
         loadFavorites()
+        loadSkills()
     }
 
 
@@ -73,21 +84,22 @@ class DashViewModel : ViewModel() {
 
 
                     _allSkills.add(
-                            UserSkill(
-                                firstName = user.firstName,
-                                lastName = user.lastName,
-                                city = userLocation,
-                                competences = user.offeredSkills,
-                                userId = user.uid,
-                                isFavorite = _favorites.value.contains(user.uid)
-                            )
+                        UserSkill(
+                            firstName = user.firstName,
+                            lastName = user.lastName,
+                            city = userLocation,
+                            competences = user.offeredSkills,
+                            userId = user.uid,
+                            isFavorite = false
+                        )
                     )
 
                 }
 
                 // Filtrage par défaut sur la ville de l'utilisateur connecté
                 val defaultCity = _userLocation.value ?: ""
-                _skills.value = _allSkills.filter { it.city == defaultCity }
+                _skills.value = if (defaultCity.isBlank()) _allSkills else _allSkills.filter { it.city.contains(defaultCity, true) }
+
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -109,7 +121,7 @@ class DashViewModel : ViewModel() {
         _skills.value = filtered
     }
 
-    private fun loadFavorites() {
+    fun loadFavorites() {
         val uid = auth.currentUser?.uid ?: return
         usersRef.child(uid).child("favoriteSkills").get()
             .addOnSuccessListener { snapshot ->
@@ -117,6 +129,7 @@ class DashViewModel : ViewModel() {
                 _favorites.value = favList.toSet()
             }
     }
+
     fun toggleFavoriteProfile(profileId: String) {
         val uid = auth.currentUser?.uid ?: return
         val newFavorites = _favorites.value.toMutableSet()
@@ -126,6 +139,12 @@ class DashViewModel : ViewModel() {
 
         _favorites.value = newFavorites
         usersRef.child(uid).child("favoriteSkills").setValue(newFavorites.toList())
+
+    }
+
+    fun reset() {
+        _skills.value = emptyList()
+        _favorites.value = emptySet()
     }
 
 

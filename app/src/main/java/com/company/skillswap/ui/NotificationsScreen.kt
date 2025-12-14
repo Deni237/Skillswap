@@ -13,6 +13,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,44 +33,30 @@ import com.google.firebase.auth.FirebaseAuth
 fun NotificationsScreen(navController: NavController, notificationViewModel: NotificationViewModel = viewModel()) {
 
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-    val requests by notificationViewModel.requests.collectAsState()
+    val notifications by notificationViewModel.notifications.collectAsState()
 
-    // Charger les demandes pour l'utilisateur connecté
+    // Charger les notifications pour l'utilisateur connecté
     LaunchedEffect(currentUserId) {
-        notificationViewModel.loadRequests(currentUserId)
+        notificationViewModel.loadNotifications(currentUserId)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Text(
-                            text = "Notifications",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-
-
+                title = { Text("Notifications") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Retour")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+                }
             )
         }
     ) { innerPadding ->
-        if (requests.isEmpty()) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+        if (notifications.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
                 Text("Aucune notification pour le moment")
@@ -81,18 +69,71 @@ fun NotificationsScreen(navController: NavController, notificationViewModel: Not
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(requests) { request ->
+                items(notifications) { notification ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
+                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer),
+                        onClick = {
+                            when(notification.type) {
+                                "new_request" -> {
+                                    navController.navigate("request/${notification.requestId}")
+                                }
+                                "request_accepted" -> {
+                                    navController.navigate("chat/${notification.senderId}")
+                                }
+                                else -> {
+                                    // Pour les autres types, rien ou gérer selon besoin
+                                }
+                            }
+                        }
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "Nouvelle demande de : ${request.senderName}",
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                            when (notification.type) {
 
+                                "new_request" -> {
+                                    Text(
+                                        text = buildAnnotatedString {
+                                            append("Nouvelle demande de : ")
+
+                                            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                                            append(notification.senderName)
+                                            pop()
+                                        },
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+
+                                "request_accepted" -> {
+                                    Text(
+                                        text = buildAnnotatedString {
+                                            append("Votre demande a été acceptée par : ")
+
+                                            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                                            append(notification.senderName)
+                                            pop()
+
+                                            append(", Faites un coucou")
+                                        },
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+
+                                else -> {
+                                    Text(
+                                        text = buildAnnotatedString {
+                                            append("Notification de : ")
+
+                                            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                                            append(notification.senderName)
+                                            pop()
+                                        },
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                }
+                            }
                         }
                     }
                 }

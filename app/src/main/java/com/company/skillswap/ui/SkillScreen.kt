@@ -52,21 +52,20 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun SkillScreen(navController: NavController,userId: String,skillViewModel: SkillViewModel = viewModel ()) {
 
-    val user = skillViewModel.user.collectAsState().value
-    var isRequestSent by remember { mutableStateOf(false) }
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+    val user by skillViewModel.user.collectAsState()
+    val requestSent by skillViewModel.requestSent.collectAsState(initial = false)
+
+    // Charger infos + vérifier demande existante à chaque affichage
     LaunchedEffect(userId) {
         skillViewModel.loadUserSkill(userId)
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@LaunchedEffect
-        skillViewModel.hasSentRequest(currentUserId, userId) { sent ->
-            isRequestSent = sent
-        }
+        skillViewModel.checkIfRequestSent(currentUserId, userId)
     }
 
     BackHandler(true) {
         navController.popBackStack()
     }
-
 
     Scaffold(
         topBar = {
@@ -98,130 +97,73 @@ fun SkillScreen(navController: NavController,userId: String,skillViewModel: Skil
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Text(
-                text = "Informations personnelles",
-                fontWeight = FontWeight.Medium,
-                fontSize = 16.sp
-            )
-
-            Divider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
-
-            // Ville
+            // Infos personnelles
             if (!user?.location.isNullOrEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.LocationOn,
-                        contentDescription = "Ville",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = user?.location ?: "",
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+                    Icon(Icons.Default.LocationOn, contentDescription = "Ville", tint = MaterialTheme.colorScheme.primary)
+                    Text(text = user?.location ?: "", fontSize = 16.sp, modifier = Modifier.padding(start = 8.dp))
                 }
             }
 
-            // Email
             if (!user?.email.isNullOrEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Email,
-                        contentDescription = "Email",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = user?.email ?: "",
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+                    Icon(Icons.Default.Email, contentDescription = "Email", tint = MaterialTheme.colorScheme.primary)
+                    Text(text = user?.email ?: "", fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
                 }
             }
 
-            // Date de naissance
-            if (!user?.birthDate.isNullOrEmpty() && user.birthDate != "Non défini") {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = "Date de naissance",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "${user.birthDate}",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
-                    )
+            user?.birthDate?.let { birthDate ->
+                if (birthDate != "Non défini") {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.DateRange,
+                            contentDescription = "Date de naissance",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = birthDate,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
                 }
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "Compétences",
-                fontWeight = FontWeight.Medium,
-                fontSize = 16.sp
-            )
-            Divider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
 
             // Compétences
             if (!user?.offeredSkills.isNullOrEmpty()) {
-
+                Text("Compétences", fontWeight = FontWeight.Medium, fontSize = 16.sp)
+                Divider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
                 user!!.offeredSkills.forEach { skill ->
-                    Text(
-                        text = "• $skill",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+                    Text("• $skill", fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
                 }
             }
 
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "Bio",
-                fontWeight = FontWeight.Medium,
-                fontSize = 16.sp
-            )
-
-            Divider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
-
-            // Description
+            // Bio
             if (!user?.description.isNullOrEmpty()) {
-                Text(
-                    text = user!!.description,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
-                )
+                Text("Bio", fontWeight = FontWeight.Medium, fontSize = 16.sp)
+                Divider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
+                Text(user!!.description, fontSize = 14.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Bouton Postuler
             Button(
-                onClick = {
-                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@Button
-                    user?.let {
-                        skillViewModel.sendRequest(
-                            senderId = currentUserId,
-                            receiverId = userId,
-                        )
-                        isRequestSent = true
-                    }
-                },
-                enabled =!isRequestSent,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 0.dp),
-                shape = RoundedCornerShape(12.dp)
+                onClick = { skillViewModel.sendRequest(currentUserId, userId) },
+                enabled = !requestSent,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (requestSent) MaterialTheme.colorScheme.surfaceVariant
+                    else MaterialTheme.colorScheme.primary
+                )
             ) {
-                Text(text = if (isRequestSent) "Demande envoyée" else "Postulez", fontSize = 18.sp)
+                Text(
+                    text = if (requestSent) "Demande envoyée" else "Postulez",
+                    color = if (requestSent) MaterialTheme.colorScheme.onSurfaceVariant
+                    else MaterialTheme.colorScheme.onPrimary
+                )
             }
-
-
         }
     }
 }

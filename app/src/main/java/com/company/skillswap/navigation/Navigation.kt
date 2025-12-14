@@ -2,12 +2,13 @@ package com.company.skillswap.navigation
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.ui.*
-
+import com.company.skillswap.viewmodel.DashViewModel
 
 
 object AppRoutes {
@@ -17,7 +18,7 @@ object AppRoutes {
     const val DASHBOARD = "dashboard"
     const val PROFILE_CONFIG = "profile_config"
     const val SKILL_DETAIL = "skill_detail/{userId}"
-
+    const val REQUEST = "request/{requestId}"
     const val PROFILE = "profile"
 
     const val EDIT_PROFILE = "edit_profile"
@@ -27,6 +28,9 @@ object AppRoutes {
 
     const val NOTIFICATIONS = "notifications"
 
+    const val CHAT = "chat/{receiverId}"
+
+
 
 
 }
@@ -34,6 +38,7 @@ object AppRoutes {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val dashViewModel: DashViewModel = viewModel()
     NavHost(
         navController = navController,
         startDestination = AppRoutes.HOME
@@ -51,7 +56,7 @@ fun AppNavigation() {
         }
 
         composable(AppRoutes.DASHBOARD) {
-            DashScreen(navController)
+            DashScreen(navController, dashViewModel)
         }
 
         composable(AppRoutes.PROFILE_CONFIG) {
@@ -59,7 +64,7 @@ fun AppNavigation() {
         }
 
         composable(AppRoutes.PROFILE) {
-            ProfileScreen(navController)
+            ProfileScreen(navController, dashViewModel)
         }
 
         composable(AppRoutes.EDIT_PROFILE) {
@@ -75,13 +80,25 @@ fun AppNavigation() {
         }
 
         composable(AppRoutes.FAVORITES) {
-            FavoritesScreen(navController)
+            FavoritesScreen(navController, dashViewModel)
         }
 
         composable(AppRoutes.SKILL_DETAIL) {
                 backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
             SkillScreen(navController = navController, userId = userId)
+        }
+
+        composable(AppRoutes.REQUEST) {
+                backStackEntry ->
+            val requestId = backStackEntry.arguments?.getString("requestId") ?: return@composable
+            RequestScreen(navController = navController,requestId = requestId)
+        }
+
+        composable(AppRoutes.CHAT) {
+                backStackEntry ->
+            val receiverId = backStackEntry.arguments?.getString("receiverId") ?: return@composable
+            ChatScreen(navController = navController,receiverId = receiverId)
         }
     }
 }

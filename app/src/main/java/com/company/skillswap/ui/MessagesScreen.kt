@@ -16,11 +16,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.navigation.AppRoutes
 import com.company.skillswap.ui.theme.SkillSwapTheme
-
+import com.company.skillswap.viewmodel.MessagesViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 
 
@@ -29,6 +31,14 @@ import com.company.skillswap.ui.theme.SkillSwapTheme
 fun MessagesScreen(
     navController: NavController// tu peux connecter ton ViewModel plus tard
 ) {
+
+    val viewModel: MessagesViewModel = viewModel()
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val conversations by viewModel.conversations.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadConversations(currentUserId)
+    }
 
     Scaffold(
         topBar = {
@@ -99,6 +109,7 @@ fun MessagesScreen(
     ) { innerPadding ->
 
 
+        if (conversations.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -107,6 +118,38 @@ fun MessagesScreen(
             ) {
                 Text("Aucun message pour le moment")
             }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                items(conversations) { convo ->
+                    ListItem(
+                        modifier = Modifier.clickable {
+                            navController.navigate(
+                                AppRoutes.CHAT.replace("{receiverId}", convo.userId)
+                            )
+                        },
+                        headlineContent = {
+                            Text(convo.name.ifBlank { "Utilisateur" },
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        supportingContent = {
+                            Text(
+                                convo.lastMessage,
+                                maxLines = 1
+                            )
+                        },
+                        leadingContent = {
+                            Icon(Icons.Default.Person, contentDescription = null)
+                        }
+                    )
+                    Divider()
+                }
+            }
+        }
 
     }
 }

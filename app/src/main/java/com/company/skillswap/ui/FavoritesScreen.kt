@@ -40,9 +40,10 @@ import com.company.skillswap.viewmodel.DashViewModel
 fun FavoritesScreen(navController: NavController, dashViewModel: DashViewModel = viewModel()){
 
 
-    val skills by dashViewModel.skills.collectAsState()
-    val favorites by dashViewModel.favorites.collectAsState()
-    val favoriteSkills = skills.filter { favorites.contains(it.userId) }
+
+
+    val skills by dashViewModel.skillsWithFavorites.collectAsState()
+    val favoriteSkills = skills.filter { it.isFavorite }
 
     Scaffold(
         topBar = {
@@ -161,7 +162,7 @@ fun FavoritesScreen(navController: NavController, dashViewModel: DashViewModel =
                                     dashViewModel.toggleFavoriteProfile(userSkill.userId)
                                 }) {
                                     Icon(
-                                        imageVector = if (favorites.contains(userSkill.userId)) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                        imageVector = if (userSkill.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                         contentDescription = "Favori",
                                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                                     )

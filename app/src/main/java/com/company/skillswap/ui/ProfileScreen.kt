@@ -59,12 +59,13 @@ import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.R
 import com.company.skillswap.navigation.AppRoutes
 import com.company.skillswap.ui.theme.SkillSwapTheme
+import com.company.skillswap.viewmodel.DashViewModel
 import com.company.skillswap.viewmodel.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController, profileViewModel: ProfileViewModel= viewModel()){
+fun ProfileScreen(navController: NavController, dashViewModel: DashViewModel = viewModel(),profileViewModel: ProfileViewModel= viewModel()){
     BackHandler(true) {}
 
     val scrollState = rememberScrollState() // <-- scroll state
@@ -112,9 +113,11 @@ fun ProfileScreen(navController: NavController, profileViewModel: ProfileViewMod
                                     text = { Text("Déconnexion") },
                                     onClick = {
                                         expanded = false
+                                        dashViewModel.reset()
+
                                         FirebaseAuth.getInstance().signOut()
                                         navController.navigate(AppRoutes.LOGIN) {
-                                            popUpTo(0) // supprime la stack pour éviter retour arrière
+                                            popUpTo(0)
                                         }
                                     }
                                 )

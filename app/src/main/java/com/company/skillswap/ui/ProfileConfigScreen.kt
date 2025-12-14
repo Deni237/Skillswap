@@ -87,6 +87,7 @@ fun ProfileConfigScreen(navController: NavController) {
                 value = firstName,
                 onValueChange = { firstName = it },
                 label = { Text("Prénom") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -96,6 +97,7 @@ fun ProfileConfigScreen(navController: NavController) {
                 value = lastName,
                 onValueChange = { lastName = it },
                 label = { Text("Nom") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -106,6 +108,7 @@ fun ProfileConfigScreen(navController: NavController) {
                 onValueChange = { offeredSkills = it },
                 label = { Text("Compétences offertes") },
                 placeholder = { Text("Ex: Programmation, Design") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -115,6 +118,7 @@ fun ProfileConfigScreen(navController: NavController) {
                 value = desiredSkills,
                 onValueChange = { desiredSkills = it },
                 label = { Text("Compétences recherchées") },
+                singleLine = true,
                 placeholder = { Text("Ex: Photographie, Marketing") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -144,6 +148,7 @@ fun ProfileConfigScreen(navController: NavController) {
                 value = location,
                 onValueChange = { location = it },
                 label = { Text("Ville") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
