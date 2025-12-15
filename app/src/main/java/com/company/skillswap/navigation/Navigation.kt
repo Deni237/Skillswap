@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.ui.*
 import com.company.skillswap.viewmodel.DashViewModel
+import com.company.skillswap.viewmodel.NotificationViewModel
 
 
 object AppRoutes {
@@ -39,6 +40,7 @@ object AppRoutes {
 fun AppNavigation() {
     val navController = rememberNavController()
     val dashViewModel: DashViewModel = viewModel()
+    val notificationViewModel: NotificationViewModel = viewModel()
     NavHost(
         navController = navController,
         startDestination = AppRoutes.HOME
@@ -56,7 +58,7 @@ fun AppNavigation() {
         }
 
         composable(AppRoutes.DASHBOARD) {
-            DashScreen(navController, dashViewModel)
+            DashScreen(navController, dashViewModel,notificationViewModel)
         }
 
         composable(AppRoutes.PROFILE_CONFIG) {
@@ -76,7 +78,7 @@ fun AppNavigation() {
         }
 
         composable(AppRoutes.NOTIFICATIONS) {
-            NotificationsScreen(navController)
+            NotificationsScreen(navController,notificationViewModel)
         }
 
         composable(AppRoutes.FAVORITES) {

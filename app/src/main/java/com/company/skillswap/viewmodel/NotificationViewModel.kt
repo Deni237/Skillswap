@@ -84,6 +84,7 @@ class NotificationViewModel: ViewModel() {
         })
     }
 
+
     fun markAsRead(notificationId: String) {
         notificationsRef.child(notificationId).child("read").setValue(true)
     }

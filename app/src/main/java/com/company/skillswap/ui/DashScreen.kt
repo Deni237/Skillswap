@@ -44,10 +44,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.company.skillswap.navigation.AppRoutes
+import com.company.skillswap.viewmodel.NotificationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashScreen(navController: NavController, dashViewModel: DashViewModel = viewModel()) {
+fun DashScreen(navController: NavController, dashViewModel: DashViewModel = viewModel(),    notificationViewModel: NotificationViewModel = viewModel()) {
 
     BackHandler(true) {}
 
@@ -60,6 +61,17 @@ fun DashScreen(navController: NavController, dashViewModel: DashViewModel = view
     var skillQuery by remember { mutableStateOf("") }
     var cityQuery by remember { mutableStateOf("") }
     val skills by dashViewModel.skillsWithFavorites.collectAsState()
+
+    // Notifications
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    LaunchedEffect(currentUserId) {
+        currentUserId?.let {
+            notificationViewModel.loadNotifications(it)
+        }
+    }
+
+    val notifications by notificationViewModel.notifications.collectAsState()
+    val unreadCount = notifications.count { !it.read }
 
     Scaffold(
         topBar = {
@@ -76,19 +88,53 @@ fun DashScreen(navController: NavController, dashViewModel: DashViewModel = view
                         Image(
                             painter = painterResource(id = R.drawable.ic_logo),
                             contentDescription = "Logo",
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.size(40.dp).clickable {
+                                navController.navigate(AppRoutes.DASHBOARD) {
+                                    launchSingleTop = true
+                                    popUpTo(AppRoutes.DASHBOARD)
+                                }
+                            }
                         )
 
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        // Nom de l'application
+                        Text(
+                            text = "SkillSwap",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
                         // Icône notification
-                        IconButton(onClick = { navController.navigate(AppRoutes.NOTIFICATIONS){
-                            launchSingleTop = true
-                            popUpTo(AppRoutes.NOTIFICATIONS)
-                        } }) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifications",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                        IconButton(
+                            onClick = {
+                                navController.navigate(AppRoutes.NOTIFICATIONS) {
+                                    launchSingleTop = true
+                                    popUpTo(AppRoutes.NOTIFICATIONS)
+                                }
+                            }
+                        ) {
+                            BadgedBox(
+                                badge = {
+                                    if (unreadCount > 0) {
+                                        Badge {
+                                            Text(
+                                                text = unreadCount.toString(),
+                                                fontSize = 10.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 },

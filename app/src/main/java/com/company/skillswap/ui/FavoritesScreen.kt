@@ -38,10 +38,6 @@ import com.company.skillswap.viewmodel.DashViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(navController: NavController, dashViewModel: DashViewModel = viewModel()){
-
-
-
-
     val skills by dashViewModel.skillsWithFavorites.collectAsState()
     val favoriteSkills = skills.filter { it.isFavorite }
 

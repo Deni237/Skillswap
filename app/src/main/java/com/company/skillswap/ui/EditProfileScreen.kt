@@ -98,6 +98,7 @@ fun EditProfileScreen(navController: NavController,profileViewModel: ProfileView
                 value = firstName,
                 onValueChange = { firstName = it },
                 label = { Text("Prénom") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -106,6 +107,7 @@ fun EditProfileScreen(navController: NavController,profileViewModel: ProfileView
                 value = lastName,
                 onValueChange = { lastName = it },
                 label = { Text("Nom") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -115,6 +117,7 @@ fun EditProfileScreen(navController: NavController,profileViewModel: ProfileView
                 onValueChange = { offeredSkills = it },
                 label = { Text("Compétences offertes") },
                 placeholder = { Text("Ex: Programmation, Design") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -124,6 +127,7 @@ fun EditProfileScreen(navController: NavController,profileViewModel: ProfileView
                 onValueChange = { desiredSkills = it },
                 label = { Text("Compétences recherchées") },
                 placeholder = { Text("Ex: Photographie, Marketing") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -150,6 +154,7 @@ fun EditProfileScreen(navController: NavController,profileViewModel: ProfileView
                 value = location,
                 onValueChange = { location = it },
                 label = { Text("Ville") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))

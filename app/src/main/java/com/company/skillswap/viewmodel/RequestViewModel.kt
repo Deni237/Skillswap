@@ -55,10 +55,15 @@ class RequestViewModel : ViewModel() {
 
     fun markAsRead(requestId: String) {
         db.child(requestId).child("read").setValue(true)
+
         _requests.value = _requests.value.map {
             if (it.requestId == requestId) it.copy(read = true) else it
         }
+
+        _selectedRequest.value = _selectedRequest.value?.takeIf { it.requestId == requestId }?.copy(read = true)
     }
+
+
 
     private fun createAcceptedNotification(
         senderId: String,
@@ -106,14 +111,19 @@ class RequestViewModel : ViewModel() {
                     } else it
                 }
 
-                _selectedRequest.value?.let {
-                    if (it.requestId == requestId) {
-                        _selectedRequest.value = it.copy(
-                            status = updates["status"] as String,
-                            read = true
-                        )
-                    }
-                }
+                _selectedRequest.value = _selectedRequest.value?.takeIf { it.requestId == requestId }?.copy(
+                    status = updates["status"] as String,
+                    read = true
+                )
+
+//                _selectedRequest.value?.let {
+//                    if (it.requestId == requestId) {
+//                        _selectedRequest.value = it.copy(
+//                            status = updates["status"] as String,
+//                            read = true
+//                        )
+//                    }
+//                }
 
                 // Récupérer la demande
                 val request =

@@ -39,6 +39,8 @@ fun RequestScreen(
     // Déterminer si la demande a déjà été traitée
     val isResponded = !request?.status.isNullOrEmpty()
 
+    val isAccepted = request?.status == "Accepter"
+
     LaunchedEffect(request) {
         request?.senderId?.let { skillViewModel.loadUserSkill(it) }
         request?.let { requestViewModel.markAsRead(requestId) }
@@ -110,25 +112,30 @@ fun RequestScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Boutons Accepter / Refuser
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            // Bouton conditionnel
+            if (isAccepted) {
                 Button(
-                    onClick = { requestViewModel.respondToRequest(requestId, true) },
-                    enabled = !isResponded,
-                    modifier = Modifier.weight(1f)
+                    onClick = {
+                        // Naviguer vers le chat avec l'utilisateur qui a envoyé la demande
+                        navController.navigate("chat/${request?.senderId}")
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Accepter")
+                    Text("Envoyer un message")
                 }
+            } else {
+                // Afficher les boutons Accepter / Refuser
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = { requestViewModel.respondToRequest(requestId, true) },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Accepter") }
 
-                Button(
-                    onClick = { requestViewModel.respondToRequest(requestId, false) },
-                    enabled = !isResponded,
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Refuser")
+                    Button(
+                        onClick = { requestViewModel.respondToRequest(requestId, false) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Refuser") }
                 }
             }
 

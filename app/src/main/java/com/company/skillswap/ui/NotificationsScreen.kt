@@ -72,13 +72,20 @@ fun NotificationsScreen(navController: NavController, notificationViewModel: Not
                 items(notifications) { notification ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (!notification.read)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.surfaceVariant
+                        ),
                         onClick = {
                             when(notification.type) {
                                 "new_request" -> {
+                                    notificationViewModel.markAsRead(notification.Id)
                                     navController.navigate("request/${notification.requestId}")
                                 }
                                 "request_accepted" -> {
+                                    notificationViewModel.markAsRead(notification.Id)
                                     navController.navigate("chat/${notification.senderId}")
                                 }
                                 else -> {
@@ -95,7 +102,7 @@ fun NotificationsScreen(navController: NavController, notificationViewModel: Not
                                         text = buildAnnotatedString {
                                             append("Nouvelle demande de : ")
 
-                                            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                                            pushStyle(SpanStyle(fontWeight = if (!notification.read) FontWeight.Bold else FontWeight.Normal))
                                             append(notification.senderName)
                                             pop()
                                         },
@@ -109,7 +116,7 @@ fun NotificationsScreen(navController: NavController, notificationViewModel: Not
                                         text = buildAnnotatedString {
                                             append("Votre demande a été acceptée par : ")
 
-                                            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                                            pushStyle(SpanStyle(fontWeight = if (!notification.read) FontWeight.Bold else FontWeight.Normal))
                                             append(notification.senderName)
                                             pop()
 

@@ -66,7 +66,6 @@ import com.google.firebase.auth.FirebaseAuth
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(navController: NavController, dashViewModel: DashViewModel = viewModel(),profileViewModel: ProfileViewModel= viewModel()){
-    BackHandler(true) {}
 
     val scrollState = rememberScrollState() // <-- scroll state
     val user = profileViewModel.currentUser.collectAsState().value
