@@ -13,13 +13,11 @@ SkillSwap est une application mobile Android permettant aux utilisateurs d’éc
 - Authentification
 - Profil utilisateur
 - Catalogue des compétences
-- Messagerie (à venir)
+- Messagerie
 - Favoris
-- Notifications (à venir)
+- Notifications
 - Paramètres du compte
 
-## 3. Architecture
-Voir schéma : (fourni dans la conversation)
 
 ## 4. Structure du projet
 ```
@@ -57,12 +55,3 @@ Cliquer sur une carte → détails de la compétence.
 
 ### Étape 4 : Modifier son profil
 Onglet Compte → Modifier informations.
-
-## 7. Roadmap
-- Ajout messagerie
-- Firebase
-- Système de recommandations IA
-- Matching automatique
-
-## 8. Licence
-MIT
